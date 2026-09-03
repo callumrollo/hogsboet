@@ -3,9 +3,9 @@ import numpy as np
 import datetime
 
 
-def mail_to_cleaners(fetch_sheets=False, send=False):
+def mail_to_cleaners(fetch_sheets=True, send=False):
     mailer("callum.rollo94@gmail.com", "started-it")
-    schedule, areas_se, areas_en = read_schedule(fetch_sheet=fetch_sheets)
+    schedule, areas_se, areas_en = read_schedule("2026-09-04", fetch_sheet=fetch_sheets)
     contacts = read_contacts(fetch_sheet=fetch_sheets)
     row_number = np.abs(schedule['send_date'] - datetime.datetime.now()).argmin()
     this_date = schedule.iloc[row_number]['date']

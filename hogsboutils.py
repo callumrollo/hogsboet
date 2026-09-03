@@ -47,10 +47,10 @@ def read_contacts(fetch_sheet=False):
         contacts = pd.read_csv(contacts_csv)
         return contacts
 
-def read_schedule(fetch_sheet=False):
+def read_schedule(first_send, fetch_sheet=True):
     schedule_csv = Path('schedule.csv')
     if fetch_sheet or not schedule_csv.exists():
-        df = pd.read_csv(f'https://docs.google.com/spreadsheets/d/{email_auth["schedule_sheet"]}/export?format=csv&gid=0#',
+        df = pd.read_csv(f'https://docs.google.com/spreadsheets/d/{email_auth["schedule_sheet"]}/export?format=csv&gid={email_auth["schedule_sheet_gid"]}#',
                            skiprows=3, names=['date', 'a1', 'a2', 'a3', 'a4'])
         df.to_csv(schedule_csv, index=False)
 
@@ -58,9 +58,11 @@ def read_schedule(fetch_sheet=False):
         df = pd.read_csv(schedule_csv)
     areas_se = df.iloc[0].to_dict()
     areas_en = df.iloc[1].to_dict()
-    schedule = df[22:-1]
-    dates = pd.date_range(start="2026-04-04", periods=len(schedule), freq="7D")
+    schedule = df[20:]
+    dates = pd.date_range(start=first_send, periods=len(schedule), freq="7D")
     schedule['send_date'] = dates
+    for colname in ['a1', 'a2', 'a3', 'a4']:
+        schedule[colname] = schedule[colname].str.rstrip()
     return schedule, areas_se, areas_en
 
 
