@@ -50,7 +50,7 @@ def read_contacts(fetch_sheet=False):
 def read_cooking_schedule(fetch_sheet=False):
     cooking_csv = Path('cooking_schedule.csv')
     if fetch_sheet or not cooking_csv.exists():
-        cooking = pd.read_csv(f'https://docs.google.com/spreadsheets/d/{email_auth["cooking_schedule_sheet"]}/export?format=csv&gid=0#', skiprows=3)
+        cooking = pd.read_csv(f'https://docs.google.com/spreadsheets/d/{email_auth["cooking_schedule_sheet"]}/export?format=csv&gid=0#', header=2)
         cooking.to_csv(cooking_csv, index=False)
         return cooking
     else:
