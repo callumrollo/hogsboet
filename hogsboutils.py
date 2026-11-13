@@ -109,3 +109,44 @@ def weekly_clean_send(df, week, contacts, areas_se, areas_en, send=False, print_
                 cleaning_mail(cleaner, mail, area, areas_se, areas_en)
             if print_msg:
                 print(week, cleaner, mail, areas_en[area])
+
+
+def weekly_cook_send(send_dict, send=False, print_msg=True):
+    team = [val for key, val in send_dict.items() if 'member' in key or key=='team lead']
+    leader = send_dict['team lead']
+    contacts_dict = {}
+    for member in team:
+        cleaner_row = contacts[contacts['Cleaning name'] == member]
+        if len(cleaner_row)==0:
+            print(f"FAIL for {member}")
+            continue
+        
+        contacts_dict[member] = cleaner_row['E-post / Email Address'].values[0]
+    channel = send_dict['discord-channel']
+    swap = 'https://discord.com/channels/1126552312488394762/1515758459499577456'
+    for member in team:
+        leader_msg = ""
+        if member == leader:
+            leader_msg = f"Hi {member.capitalize()}!\n\nThank you for leading the cooking team this week. An automated reminder with the following text has just been sent to the following members of your team:{[name for key, name in send_dict.items() if 'member' in key]}. If that list does not match your expectations, please contact Callum on discord. Thanks!\n\n"
+        msg_en = f"Hi {member.capitalize()}, \n\n" \
+          f"A friendly reminder that you are on the cooking team next week! " \
+          f"Please join the discussion on discord in channel {channel}. " \
+          f"If you are unable to complete your cooking duties next week please make sure to find somone to switch with as soon as possible using the swap-duties channel {swap} and let your team know on discord or contact your team lead {leader.capitalize()} {contacts_dict[leader]} by 10 pm tomorrow. Please do not reply to this email.\n\n" \
+          "Kind regards\nCooking group & board.\n\n"
+        msg_se = f"Hej {member.capitalize()}, \n\n" \
+        f"Här kommer en vänlig påminnelse om att du ingår i matlagningsgruppen nästa vecka! Var vänlig och delta i diskussionen på Discord "\
+        f"i kanalen ⁠{channel}. Om du inte har möjlighet att delta nästa vecka, se till att hitta någon att byta med "\
+        f"så snart som möjligt via kanalen för byte av uppgifter {swap} och meddela din matlagningsgrupp på Discord eller kontakta den sammankallande för gruppen "\
+        f"{leader.capitalize()} {contacts_dict[leader]} senast kl. 22.00 imorgon. Svara inte på detta e-postmeddelande. "\
+        "Med vänliga hälsningar\nMatlagningsgruppen och styrelsen."
+        msg = f"{leader_msg}<English below>\n\n{msg_se}\n\n{msg_en}"
+        cleaner_row = contacts[contacts['Cleaning name'] == member]
+        email = cleaner_row['E-post / Email Address'].values[0]
+        if print_msg:
+            print(member, email)
+            print(msg)
+        
+        if send:
+            mailer(email, msg, sender="noreply Högsboet bot", subject="Cooking reminder / matlag påminnelse")
+
+        
